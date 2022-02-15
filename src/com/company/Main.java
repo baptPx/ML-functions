@@ -7,8 +7,8 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static Double alpha = 0.01;
-    public static int nb_iterations = 1500;
+    public static Double alpha = 0.0000001;
+    public static int nb_iterations = 150000000;
 
     public static Double[][] readSimpleDataset(String path) {
         try {
@@ -47,6 +47,13 @@ public class Main {
         for(int i =0; i < data.length; i++) {
             coefs[0][i] = 1.0;
             coefs[1][i] = data[i];
+        }
+        return coefs;
+    }
+    public static Double[][] buildCoefsNDegree(Double data[], int degree) {
+        Double coefs[][] = new Double[degree + 1][data.length];
+        for(int i =0; i < data.length; i++) {
+            for(int d = 0; d <= degree; d ++) coefs[d][i] = Math.pow(data[i], d) * (data[i] < 0 ? -1 : 1);
         }
         return coefs;
     }
@@ -92,12 +99,14 @@ public class Main {
     }
     public static void main(String[] args) {
 	// write your code here
-        Double data[][] = readSimpleDataset("dataset2");
-        Double[][] coefs = buildCoefs(data[0]);
-        Double theta[] = new Double[]{0.0, 0.0};
+
+        Double data[][] = readSimpleDataset("dataset");
+//        Double[][] coefs = buildCoefs(data[0]);
+        Double[][] coefs = buildCoefsNDegree(data[0], 2);
+        Double theta[] = new Double[]{0.0, 0.0, 0.0};
         Double cost = calculCost(coefs, data[1], theta);
         for(int i = 0; i < nb_iterations; i++) theta = gradient(coefs, data[1], theta);
-        System.out.println(theta[0].toString() + " : " + theta[1]);
+        System.out.println(theta[2] + "x^2 + " + theta[1] + " x + " + theta[0]);
 
     }
 }
