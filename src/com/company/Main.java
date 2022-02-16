@@ -7,8 +7,8 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static Double alpha = 0.0000001;
-    public static int nb_iterations = 150000000;
+    public static Double alpha = 0.00001;
+    public static int nb_iterations = 15000;
 
     public static Double[][] readSimpleDataset(String path) {
         try {
@@ -63,7 +63,6 @@ public class Main {
         for(int i =0; i < y.length; i ++) {
             Double calculI = 0.0;
             for(int j = 0; j< theta.length; j++) {
-                System.out.println(i + " : " + j);
                 calculI += coefs[j][i] * theta[j];
             }
             calculI -= y[i];
@@ -72,40 +71,67 @@ public class Main {
         return total;
     }
 
-    public static Double[] gradient(Double coefs[][], Double y[], Double theta[]) {
-        Double total = 0.0;
+    public static Double[] gradient(Double X[][], Double y[], Double theta[], Double coefs[]) {
         Double[] error = new Double[y.length];
         Double errorTheta[] = new Double[theta.length];
         int size = y.length;
-        Double thetaCoef = alpha/size;
+//        Double thetaCoef = alpha/size;
         Arrays.fill(errorTheta, 0.0);
         for(int i =0; i < size; i ++) {
             error[i] = 0.0;
             for(int j = 0; j< theta.length; j++) {
-                error[i] += coefs[j][i] * theta[j];
+                error[i] += X[j][i] * theta[j];
             }
             error[i] -= y[i];
         }
         for(int i = 0; i < size; i++) {
-            for(int j = 0; j < theta.length; j++) errorTheta[j] += error[i] * coefs[j][i];
+            for(int j = 0; j < theta.length; j++) errorTheta[j] += error[i] * X[j][i];
         }
         Double[] newTheta = new Double[theta.length];
         for(int j = 0; j < theta.length; j++) {
-            errorTheta[j] *= thetaCoef;
+            errorTheta[j] *= coefs[j] / size;
             newTheta[j] = theta[j] - errorTheta[j];
         }
 
         return newTheta;
+    }
+    public static Double[] findMinCoef(Double X[][], Double y[], Double theta[]) {
+        Double min = 0.0000000000000000000000000000000000000000000001;
+        Double mins[] = new Double[theta.length];
+        Double finalMins[] = new Double[theta.length];
+        for(int i =0; i<theta.length; i++) {
+            Arrays.fill(mins, min);
+            Double thetaCopy[] = new Double[theta.length];
+            Arrays.fill(thetaCopy, 0.0);
+            Double initCost = calculCost(X, y, thetaCopy);
+            mins[i] = .0001;
+            Double newCost, newCost2;
+            do {
+                Arrays.fill(thetaCopy, 0.0);
+                thetaCopy = gradient(X, y, thetaCopy, mins);
+                newCost = calculCost(X, y, thetaCopy);
+
+                thetaCopy = gradient(X, y, thetaCopy, mins);
+                newCost2 = calculCost(X, y, thetaCopy);
+                mins[i] *= 0.5;
+            } while(newCost > initCost || newCost2 > initCost);
+            finalMins[i] = mins[i];
+        }
+        return finalMins;
     }
     public static void main(String[] args) {
 	// write your code here
 
         Double data[][] = readSimpleDataset("dataset");
 //        Double[][] coefs = buildCoefs(data[0]);
-        Double[][] coefs = buildCoefsNDegree(data[0], 2);
+        Double[][] X = buildCoefsNDegree(data[0], 2);
         Double theta[] = new Double[]{0.0, 0.0, 0.0};
-        Double cost = calculCost(coefs, data[1], theta);
-        for(int i = 0; i < nb_iterations; i++) theta = gradient(coefs, data[1], theta);
+        Double minCoefs[] = findMinCoef(X, data[1], theta);
+        for(int i = 0; i < nb_iterations; i++) {
+            theta = gradient(X, data[1], theta, minCoefs);
+            Double cost = calculCost(X, data[1], theta);
+            System.out.println("Cost : "  + cost);
+        }
         System.out.println(theta[2] + "x^2 + " + theta[1] + " x + " + theta[0]);
 
     }
