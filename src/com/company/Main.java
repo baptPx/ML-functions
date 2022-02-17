@@ -8,7 +8,7 @@ import java.util.Scanner;
 public class Main {
 
     public static Double alpha = 0.00001;
-    public static int nb_iterations = 15000;
+    public static int nb_iterations = 1500000;
 
     public static Double[][] readSimpleDataset(String path) {
         try {
@@ -129,8 +129,8 @@ public class Main {
         Double minCoefs[] = findMinCoef(X, data[1], theta);
         for(int i = 0; i < nb_iterations; i++) {
             theta = gradient(X, data[1], theta, minCoefs);
-            Double cost = calculCost(X, data[1], theta);
-            System.out.println("Cost : "  + cost);
+//            Double cost = calculCost(X, data[1], theta);
+//            System.out.println("Cost : "  + cost);
         }
         System.out.println(theta[2] + "x^2 + " + theta[1] + " x + " + theta[0]);
 
